@@ -25,7 +25,7 @@ async def signup(user_details):
     )
     await prisma.disconnect()
 
-    return
+    return {"success":True, "message":"Account created"}
 
 if __name__ == '__main__':
     asyncio.run(signup())
