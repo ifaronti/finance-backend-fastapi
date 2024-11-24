@@ -12,18 +12,18 @@ class signup_response(BaseModel):
     Success:bool
     Message:str
 
-auth_router = APIRouter(prefix="/auth",tags=["Authentication"])
+router = APIRouter(prefix="/auth",tags=["Authentication"])
 
-@auth_router.post("/signup", status_code=status.HTTP_201_CREATED, response_model=signup_response)
+@router.post("/signup", status_code=status.HTTP_201_CREATED, response_model=signup_response)
 async def register(user_details:Register):
     await signup(user_details)
     return {"Success":True, "Message":"User created successfully"}
 
 
-@auth_router.post("/login", status_code=status.HTTP_200_OK, response_model=LoginResponse)
+@router.post("/login", status_code=status.HTTP_200_OK, response_model=LoginResponse)
 async def login(data:Annotated[Login, Depends(OAuth2PasswordRequestForm)]):
     return await logon(data)
 
-@auth_router.get("/login", status_code=status.HTTP_200_OK, response_model=LoginResponse)
+@router.get("/login", status_code=status.HTTP_200_OK, response_model=LoginResponse)
 async def gitLogin(code:str):
     return await github_login(code)
