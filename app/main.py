@@ -4,20 +4,9 @@ from .routers import transactions
 from .routers import budgets
 from .routers import pots
 from .routers import bills
-from prisma import Prisma
 # from mangum import Mangum
 
-prisma = Prisma()
-
 app = FastAPI()
-
-@app.on_event("startup")
-async def prisma_connect():
-    await prisma.connect()
-
-@app.on_event("shutdown")
-async def prisma_disconnect():
-    await prisma.disconnect()
 
 app.include_router(auth.router)
 app.include_router(transactions.router)
