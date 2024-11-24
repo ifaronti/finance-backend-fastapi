@@ -4,10 +4,11 @@ from ...dependencies.token import create_token
 from ...dependencies.password_manager import verify_password
 from ...utils.models import Login
 
+
 prisma=Prisma()
 
 not_found = HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
-                           detail="User not found")
+                            detail="User not found")
 
 invalid_credentials = HTTPException(status_code=status.HTTP_403_FORBIDDEN, 
                                     detail="Invalid credentials")
