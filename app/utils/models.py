@@ -4,7 +4,6 @@ from typing import Optional
 from fastapi import Request
 
 class Register(BaseModel):
-    income:int
     name:str
     password:str
     email:str
