@@ -15,6 +15,8 @@ app.include_router(budgets.router)
 app.include_router(pots.router)
 app.include_router(bills.router)
 
-
+@app.get('/')
+def test_page():
+    return {"message":"Hello world test run"}
 
 # lambda_handler = Mangum(app=app, lifespan="off")
