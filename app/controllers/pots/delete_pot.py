@@ -10,7 +10,7 @@ prisma_exception = HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
 async def delete_pot(id:int):
     try:
         await prisma.connect()
-        await prisma.pot.delete(where={"potId":id})
+        await prisma.pots.delete(where={"potId":id})
     except:
         raise prisma_exception
     finally:

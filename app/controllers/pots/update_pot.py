@@ -21,7 +21,7 @@ async def update_pot(req:Request, data:UpdatePot, add:Optional[int]=None, subtra
             await prisma.user.update(where={"id":req.state.user}, 
                                  data={"balance":balance_query})
             
-        await prisma.pot.update(
+        await prisma.pots.update(
             data=data_copy, 
             where={"potId":data_copy["potId"], "userId":req.state.user}
         )

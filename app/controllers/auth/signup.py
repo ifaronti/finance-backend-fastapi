@@ -11,11 +11,11 @@ async def signup(user_details:Register):
     queryDetails = dict(user_details).copy()
     hashed_pass = hash_password(user_details.password)
     balances = account_balance()
-    queryDetails["password"] = hashed_pass
     queryDetails.update({
             "income":balances["income"], 
             "expenses":balances["expenses"],
             "balance":balances["current"],
+            "password":hashed_pass
         })
     try:
         await prisma.connect()
@@ -30,8 +30,8 @@ async def signup(user_details:Register):
 
         await asyncio.gather(
             prisma.transactions.create_many(data=holder_data["transactions"]),
-            prisma.budget.create_many(data=holder_data["budgets"]),
-            prisma.pot.create_many(data=holder_data["pots"]),
+            prisma.budgets.create_many(data=holder_data["budgets"]),
+            prisma.pots.create_many(data=holder_data["pots"]),
             prisma.bills.create_many(data=holder_data["bills"]),
             # return_exceptions=True,
         )

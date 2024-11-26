@@ -10,7 +10,7 @@ async def update_budget(data:UpdateBudget, req:Request):
 
     try:
         await prisma.connect()
-        await prisma.budget.upsert(
+        await prisma.budgets.upsert(
             where={
                 "userId":req.state.user, 
                 "budgetId":data_copy["budgetId"]

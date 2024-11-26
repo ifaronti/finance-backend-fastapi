@@ -29,7 +29,7 @@ async def create_budget(data:CreateBudget, req:Request):
             spent = 0
 
         data_copy["spent"] = spent
-        await prisma.budget.create(
+        await prisma.budgets.create(
             data=data_copy,
         )
     except:

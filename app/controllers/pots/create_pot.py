@@ -13,7 +13,7 @@ async def create_pot(data:CreatePot, req:Request):
     data_copy["userId"] = req.state.user
     try:
         await prisma.connect()
-        await prisma.pot.create(data=data_copy)
+        await prisma.pots.create(data=data_copy)
     except:
         raise prisma_exception
     finally:

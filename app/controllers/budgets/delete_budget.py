@@ -6,7 +6,7 @@ prisma = Prisma
 async def delete_budget(id:int):
     try:
         await prisma.connect()
-        await prisma.budget.delete(where={'budgetId':id})
+        await prisma.budgets.delete(where={'budgetId':id})
     except:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Budget is not deleted, try again")
     finally:

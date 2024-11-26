@@ -9,7 +9,7 @@ async def get_budgets(req:Request, skip:Optional[int]=0):
     try:
         await prisma.connect()
 
-        budgets = await prisma.budget.find_many(
+        budgets = await prisma.budgets.find_many(
             where={'userId':user_id},
             include={
                 'category_relate':{

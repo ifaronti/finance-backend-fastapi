@@ -9,7 +9,7 @@ prisma_exception = HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
 async def delete_bill(id:int, req:Request):
     try:
         await prisma.connect()
-        await prisma.bills.delete(where={'BillId':id, "userId":req.state.user})
+        await prisma.bills.delete(where={'billId':id, "userId":req.state.user})
     except:
         raise prisma_exception
     finally:

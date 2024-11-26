@@ -12,7 +12,7 @@ async def get_pots(req:Request, skip:Optional[int]=0):
     user_id = req.state.user
     try:
         await prisma.connect()
-        pots = await prisma.pot.find_many(where={'userId':user_id}, skip=skip, take=10)
+        pots = await prisma.pots.find_many(where={'userId':user_id}, skip=skip, take=10)
     except:
         raise prisma_exception
     finally:
