@@ -1,10 +1,11 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from .routers import auth
 from .routers import transactions
 from .routers import budgets
 from .routers import pots
 from .routers import bills
 from prisma import Prisma
+from .controllers.account_summary import account_summary
 import json
 
 # from mangum import Mangum
@@ -18,9 +19,6 @@ app.include_router(budgets.router)
 app.include_router(pots.router)
 app.include_router(bills.router)
 
-@app.get('/')
-def test_page():
-    return {"message":"Hello world test run"}
 
 # @app.get('/category')
 # async def create_categories():

@@ -77,3 +77,4 @@ class CreateBill(BaseModel):
     avatar:str
     category:str
     categoryId:int
+    due_day:int
