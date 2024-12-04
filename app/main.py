@@ -6,6 +6,7 @@ from .routers import pots
 from .routers import bills
 from prisma import Prisma
 from .controllers.account_summary import account_summary
+from .routers import summary
 
 app = FastAPI()
 prisma = Prisma()
@@ -15,5 +16,6 @@ app.include_router(transactions.router)
 app.include_router(budgets.router)
 app.include_router(pots.router)
 app.include_router(bills.router)
+app.include_router(summary.router)
 
     

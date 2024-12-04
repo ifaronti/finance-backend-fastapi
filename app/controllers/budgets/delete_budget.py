@@ -1,7 +1,7 @@
 from prisma import Prisma
 from fastapi import HTTPException, status
 
-prisma = Prisma
+prisma = Prisma()
 
 async def delete_budget(id:int):
     try:

@@ -10,7 +10,7 @@ async def github_login(code:str):
     await prisma.connect()
     auth_data = get_user(code)
 
-    user = await prisma.user.find_first(where={"githubID":auth_data["id"]})
+    user = await prisma.user.find_first(where={"githubid":auth_data["id"]})
 
     if user != None and user.email != auth_data["email"]:
         user = await prisma.user.update(where={"id":user.id}, data={"email":auth_data["email"]})
@@ -20,7 +20,7 @@ async def github_login(code:str):
             "name":auth_data["name"],
             "email":auth_data["email"],
             "avatar":auth_data["avatar_url"],
-            "githubID":auth_data["id"],
+            "githubid":auth_data["id"],
             "income":5000
         })
 

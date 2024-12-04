@@ -7,7 +7,6 @@ from ..utils.models import Register, Login, LoginResponse
 from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 from typing import Annotated
 
-
 class signup_response(BaseModel):
     Success:bool
     Message:str

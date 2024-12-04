@@ -1,12 +1,13 @@
-generator client {
-    provider             = "prisma-client-py"
-    recursive_type_depth = 5
-    interface            = "asyncio"
+generator py {
+  provider             = "prisma-client-py"
+  recursive_type_depth = "5"
+  interface            = "asyncio"
+  enable_experimental_decimal = true
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model bills {
@@ -16,11 +17,11 @@ model bills {
   category        String
   isPlaceholder   Boolean  @default(false)
   avatar          String
-  due_day         Int
   categoryId      Int
   userId          String
   updatedAt       DateTime @default(now())
   createdAt       DateTime @default(now())
+  due_day         Int
   category_relate category @relation(fields: [categoryId], references: [categoryId])
   user            user     @relation(fields: [userId], references: [id])
 }
@@ -33,9 +34,9 @@ model budgets {
   theme           String
   createdAt       DateTime @default(now())
   updatedAt       DateTime @default(now())
-  spent           Decimal  @default(0) @db.Decimal(30, 2)
   userId          String
   isPlaceholder   Boolean  @default(false)
+  spent           Decimal  @default(0) @db.Decimal(30, 2)
   category_relate category @relation(fields: [categoryId], references: [categoryId])
   user            user     @relation(fields: [userId], references: [id])
 }

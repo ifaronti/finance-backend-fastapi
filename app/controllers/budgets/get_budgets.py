@@ -19,6 +19,7 @@ async def get_budgets(req:Request, skip:Optional[int]=0):
                     ROW_NUMBER() OVER (PARTITION BY t."categoryId" ORDER BY t.date DESC) AS row_num
                 FROM transactions t
                 WHERE EXTRACT(MONTH FROM t.date) > 7  -- Filter transactions after July
+                AND t."userId" = '{req.state.user}'
             )
             SELECT 
                 bg."budgetId", 
@@ -42,7 +43,7 @@ async def get_budgets(req:Request, skip:Optional[int]=0):
                 ON bg."categoryId" = t."categoryId"
                 AND t.row_num <= 3  -- Only join the top 3 most recent transactions per category
             WHERE 
-                bg."userId" = {req.state.user} AND t."userId" = {req.state.user}
+                bg."userId" = '{req.state.user}'
             GROUP BY 
                 bg."budgetId" """)
     except:
