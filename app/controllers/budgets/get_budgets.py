@@ -18,8 +18,7 @@ async def get_budgets(req:Request, skip:Optional[int]=0):
                     t.avatar,
                     ROW_NUMBER() OVER (PARTITION BY t."categoryId" ORDER BY t.date DESC) AS row_num
                 FROM transactions t
-                WHERE EXTRACT(MONTH FROM t.date) > 7  -- Filter transactions after July
-                AND t."userId" = '{req.state.user}'
+                WHERE t."userId" = '{req.state.user}'
             )
             SELECT 
                 bg."budgetId", 
@@ -27,7 +26,7 @@ async def get_budgets(req:Request, skip:Optional[int]=0):
                 bg.category, 
                 bg."isPlaceholder", 
                 bg."categoryId", 
-                SUM(t.amount) AS spent, 
+                (SELECT SUM(tn.amount) FROM transactions tn WHERE tn."userId"='{req.state.user}' AND EXTRACT(MONTH FROM tn.date) > 7 AND tn."categoryId" = bg."categoryId" AND tn.amount::text LIKE '%-%' ) AS spent, 
                 bg.theme, 
                 json_agg(
                     json_build_object(
@@ -41,13 +40,13 @@ async def get_budgets(req:Request, skip:Optional[int]=0):
                 budgets bg
             LEFT JOIN recent_transactions t 
                 ON bg."categoryId" = t."categoryId"
-                AND t.row_num <= 3  -- Only join the top 3 most recent transactions per category
+                AND t.row_num <=3
             WHERE 
                 bg."userId" = '{req.state.user}'
             GROUP BY 
                 bg."budgetId" """)
     except:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Budget not updated try again")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Prisma error, try again")
     finally:
         await prisma.disconnect()
     return {"success":True, "data":budgets}

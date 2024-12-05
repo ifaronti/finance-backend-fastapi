@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from datetime import datetime
 from typing import Optional
 from fastapi import Request
@@ -15,7 +15,16 @@ class Login(BaseModel):
 class LoginResponse(BaseModel):
     name:str
     success:bool
-    accessToken:str
+    access_token:str
+    token_type:str
+
+class UserUpdate(BaseModel):
+    name: Optional[str] = Field(
+        None,
+        pattern=r'^[\p{L}\p{N}\s-]+$'
+    )
+    email: Optional[EmailStr]
+    password:Optional[str] = ''
 
 class TokenPayload(BaseModel):
     exp:datetime

@@ -31,7 +31,7 @@ async def logon(auth_details:Login)->dict:
             raise invalid_credentials
 
         token = create_token(user.id)
-        return {"name":user.name, "accessToken":token, "success":True}
+        return {"name":user.name, "access_token":token, "success":True, "token_type":"Bearer"}
     
     finally:
         await prisma.disconnect()
