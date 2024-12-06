@@ -18,4 +18,7 @@ app.include_router(pots.router)
 app.include_router(bills.router)
 app.include_router(summary.router)
 
+@app.get('/')
+def welcome_page():
+    return "WELCOME TO MY API. ADD '/doc' TO THE URL TO CHECK IT OUT"
     

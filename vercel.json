@@ -3,7 +3,13 @@
     "builds": [
       {
         "src": "app/main.py",
-        "use": "@vercel/python"
+        "use": "@vercel/python",
+        "config": {
+          "includeFiles": [
+            "prisma/**",
+            "venv/lib/prisma/**"
+          ]
+        }
       }
     ],
     "routes": [
@@ -11,5 +17,8 @@
         "src": "/(.*)",
         "dest": "app/main.py"
       }
-    ]
+    ],
+    "env": {
+      "APP_MODULE": "main:app"
+    }
   }
