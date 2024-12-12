@@ -60,12 +60,11 @@ class GenericResponse(BaseModel):
     message:str
 
 class UpdateBudget(BaseModel):
-    theme:str
-    maximum:int
+    theme:Optional[str] = None
+    maximum:Optional[int] = None
     budgetId:int
-    category:str
-    categoryId:int
-    spent:int
+    category:Optional[str] = None
+    categoryId:Optional[int] = None
 
 class CreatePot(BaseModel):
     name:str
@@ -74,10 +73,9 @@ class CreatePot(BaseModel):
     theme:str
 
 class UpdatePot(BaseModel):
-    name:str
-    theme:str
-    total:int
-    target:int
+    name:Optional[str] = None
+    theme:Optional[str] = None
+    target:Optional[int] = None
     potId:int
 
 class CreateBill(BaseModel):

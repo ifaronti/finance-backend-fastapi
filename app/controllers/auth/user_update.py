@@ -1,35 +1,26 @@
 from ...dependencies.password_manager import hash_password
-from fastapi import Request, HTTPException, status
-from prisma import Prisma
-from ...utils.models import UserUpdate
+from fastapi import Request
+from ...utils.models import UserUpdate, GenericResponse
+from ...pyscopg_connect import dbconnect
 
-prisma = Prisma()
-
-async def update_user(req:Request, details:UserUpdate):
-    query = {}
-    if details.name:
-        query["name"] = details.name
-
+def update_user(req:Request, details:UserUpdate)-> GenericResponse:
     if details.password:
-        pass_hashed = hash_password(details.password)
-        query["password"] = pass_hashed
-
-    if details.email:
-        query["email"] = details.email
-
-    try:
-        await prisma.connect()
-        await prisma.user.upsert(
-            where= {id:req.state.user},
-            data={
-                "create": query,
-                "update":query
-            }
-        )
-    except:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Check your provided data")
-    finally:
-        await prisma.disconnect()
-
+        pass_hash = hash_password(details.password)
+   
+    sql = f""" UPDATE "user"
+            SET 
+                password = COALESCE(%s, password),
+                email = COALESCE(%s, email),
+                name = COALESCE(%s, name)
+            WHERE id = %s
+        """
+    cursor = dbconnect.cursor()
+    cursor.execute(sql, (pass_hash, details.email, details.name, req.state.user))
+    
     return {"success":True, "message":"User Account updated successfully"}
+
+
+# COALESCE in the above sql query ensures that a non null value is used to update user.
+# The 3 arguments for user_update are optional so a user can choose to update any of them meaning,
+#pydantic won't throw any errors. so to ensure that a required field is not set to a null value,
+#if the value is null in details, the value in the databse is unchaged hence email = COALESCE(%s, email) etc.

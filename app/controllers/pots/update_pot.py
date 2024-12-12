@@ -1,33 +1,49 @@
-from prisma import Prisma
 from fastapi import Request, status, HTTPException
-from ...utils.models import UpdatePot
+from ...utils.models import UpdatePot, GenericResponse
 from typing import Optional
+from ...pyscopg_connect import dbconnect
 
-prisma = Prisma()
-
-prisma_exception = HTTPException(status_code=status.HTTP_400_BAD_REQUEST, 
+exception = HTTPException(status_code=status.HTTP_400_BAD_REQUEST, 
                             detail="An error occured")
 
-async def update_pot(req:Request, data:UpdatePot, add:Optional[int]=None, subtract:Optional[int]=None):
-    data_copy = dict(data).copy()
-    data_copy["userId"] = req.state.user
-    if add:
-        balance_query = {"increment":add}
-    if subtract:
-        balance_query = {"decrement":subtract}
+def update_pot(req:Request, 
+               data:UpdatePot, 
+               add:Optional[int]=None, 
+               subtract:Optional[int]=None
+            )->GenericResponse:
+    cursor = dbconnect.cursor()
     try:
-        await prisma.connect()
-        if add or subtract:
-            await prisma.user.update(where={"id":req.state.user}, 
-                                 data={"balance":balance_query})
-            
-        await prisma.pots.update(
-            data=data_copy, 
-            where={"potId":data_copy["potId"], "userId":req.state.user}
+        sql = f"""
+            WITH pot_update AS(
+                UPDATE pots
+                    SET
+                        name = COALESCE(%s, name),
+                        theme = COALESCE(%s, theme),
+                        total= COALESCE(total + %s, total - %s, total),
+                        target = COALESCE(%s, target)
+                WHERE "potId" = %s
+                AND "userId" = '{req.state.user}'
+            )
+            UPDATE "user"
+                SET
+                    balance = COALESCE(balance + %s, balance - %s, balance)
+            WHERE id = '{req.state.user}'
+        """
+
+        params = (
+            data.name,
+            data.theme,
+            subtract,
+            add,
+            data.target if not 0 else None,
+            data.potId if not 0 else None,
+            add,
+            subtract
         )
+
+        cursor.execute(sql, params)
+        dbconnect.commit()
     except:
-        raise prisma_exception
-    finally:
-        await prisma.disconnect()
+        raise exception
     
-    return {"success":True, "message":"Pot updated."}
+    return {"success":True, "message":"Pot updated successfully."}

@@ -1,21 +1,24 @@
-from prisma import Prisma
 from fastapi import Request, status, HTTPException
 from typing import Optional
+from ...pyscopg_connect import dbconnect
+from ...utils.models import GenericResponse
 
-
-prisma = Prisma()
-
-prisma_exception = HTTPException(status_code=status.HTTP_400_BAD_REQUEST, 
+exception = HTTPException(status_code=status.HTTP_400_BAD_REQUEST, 
                             detail="An error occured check id params")
 
-async def get_pots(req:Request, skip:Optional[int]=0):
-    user_id = req.state.user
+def get_pots(req:Request, skip:Optional[int]=0)->GenericResponse:
+    cursor = dbconnect.cursor()
     try:
-        await prisma.connect()
-        pots = await prisma.pots.find_many(where={'userId':user_id}, skip=skip, take=10)
+        sql = f""" 
+            SELECT p.target, p.theme, p.name, p.total, p."potId"
+            FROM pots p
+            WHERE "userId" = '{req.state.user}'
+            ORDER BY p.name DESC
+            OFFSET %s
+        """
+        cursor.execute(sql, (skip,))
+        pots = cursor.fetchall()
     except:
-        raise prisma_exception
-    finally:
-        await prisma.disconnect()
+        raise exception
 
-    return {"success":True, "data":list(pots)}
+    return {"success":True, "data":pots}

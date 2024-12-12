@@ -15,17 +15,17 @@ router = APIRouter(
 )
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=GenericResponse)
-async def createBudget(data:CreateBudget, req:Request):
-    return await create_budget(data, req)
+def createBudget(data:CreateBudget, req:Request):
+    return create_budget(data, req)
 
 @router.delete("/budget/{id}", status_code=status.HTTP_200_OK, response_model=GenericResponse)
-async def deleteBudget(id:int):
-    return await delete_budget(id)
+def deleteBudget(id:int, req:Request):
+    return delete_budget(id, req=req)
 
 @router.get("/", status_code=status.HTTP_200_OK)
-async def getBudgets(req:Request, skip:Optional[int]=0):
-    return await get_budgets(req=req, skip=skip)
+def getBudgets(req:Request, skip:Optional[int]=0):
+    return get_budgets(req=req, skip=skip)
 
 @router.patch("/budget", status_code=status.HTTP_200_OK, response_model=GenericResponse)
-async def updateBudget(data:UpdateBudget, req:Request):
-    return await update_budget(data=data, req=req)
+def updateBudget(data:UpdateBudget, req:Request):
+    return update_budget(data=data, req=req)

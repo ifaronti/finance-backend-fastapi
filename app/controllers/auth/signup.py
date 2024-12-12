@@ -1,44 +1,53 @@
-from prisma import Prisma
+from fastapi import HTTPException, status
 from ...dependencies.password_manager import hash_password
 from ...dependencies.placeholders import account_balance, placeholders
-import asyncio
-from fastapi import HTTPException, status
-from ...utils.models import Register
+from ...utils.models import Register, GenericResponse
+from psycopg2.extras import Json
+from ...pyscopg_connect import dbconnect
+import uuid
+from .auth_sqls import register_sql
 
-prisma = Prisma()
 
-async def signup(user_details:Register):
+user_id = str(uuid.uuid1())
+
+def signup(user_details:Register)-> GenericResponse:
     queryDetails = dict(user_details).copy()
     hashed_pass = hash_password(user_details.password)
     balances = account_balance()
+    acct_summary = account_balance()
+    data = placeholders()
     queryDetails.update({
             "income":balances["income"], 
             "expenses":balances["expenses"],
-            "balance":balances["current"],
+            "balance":balances["balance"],
             "password":hashed_pass
-        })
-    try:
-        await prisma.connect()
-        already_user = await prisma.user.find_first(where={"email":queryDetails["email"]})
+    })
+    cursor = dbconnect.cursor()
+    
+    cursor.execute(f""" SELECT id FROM "user" u WHERE email = '{queryDetails['email']}' """)
+    user = cursor.fetchall()
+    if user:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail='User already exists')
 
-        if(already_user):
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, 
-                                detail="User already exists"
-                                )
-        user = await prisma.user.create(data = queryDetails)
-        holder_data = placeholders(user.id)
+    trns = Json(data["transactions"])
+    bills = Json(data["bills"])
+    budgets = Json(data["budgets"])
+    pots = Json(data["pots"]) 
 
-        await asyncio.gather(
-            prisma.transactions.create_many(data=holder_data["transactions"]),
-            prisma.budgets.create_many(data=holder_data["budgets"]),
-            prisma.pots.create_many(data=holder_data["pots"]),
-            prisma.bills.create_many(data=holder_data["bills"]),
-            # return_exceptions=True,
-        )
-    finally:
-        await prisma.disconnect()
+    params = (
+        user_id,
+        queryDetails['name'],
+        queryDetails['email'],
+        queryDetails['password'],
+        acct_summary["income"],
+        acct_summary["expenses"],
+        acct_summary["balance"],
+        trns, bills, budgets, pots
+    )
+
+    cursor.execute(register_sql, params)
+    user = cursor.fetchone()
+    print(user[0])
+    dbconnect.commit()
 
     return {"success":True, "message":"Account created"}
-
-if __name__ == '__main__':
-    asyncio.run(signup())

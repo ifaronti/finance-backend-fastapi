@@ -7,3 +7,7 @@ class Settings(BaseSettings):
     TOKEN_TIME:str
     CLIENT_ID:str
     CLIENT_SECRET:str
+    PGHOST:str
+    PGDATABASE:str
+    PGUSER:str
+    PGPASSWORD:str

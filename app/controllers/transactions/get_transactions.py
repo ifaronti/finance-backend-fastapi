@@ -1,31 +1,38 @@
-from prisma import Prisma
 from fastapi import status, HTTPException, Request
 from ...utils.sort_transacions import sort_transactions
+from ...pyscopg_connect import dbconnect
+from typing import Optional
 
-prisma = Prisma()
-
-async def get_Transactions(req:Request, skip:int, sort:str, category:str, name:str):
-    await prisma.connect()
-    query = {"userId":req.state.user}
-
-    if category != "All Transactions":
-        query["category"] = category
-    
-    if name != None:
-        query["name"] = name
-    
+def get_Transactions(req:Request,
+                        sort:str, 
+                        category:str,  
+                        skip:Optional[int]=0, 
+                        name:Optional[str]= None
+                    ):
     items_sort = sort_transactions(sort)
+    cursor = dbconnect.cursor()
+    if category == "All":
+        category = None
+    try:
+        sql = f""" 
+            SELECT * FROM transactions t 
+            WHERE t."userId" = '{req.state.user}'
+            {f"AND position('{category.strip("'Category.'")}' IN t.category)>0" if category else ''}
+            {f" {f"AND position(LOWER('{name}') IN LOWER(t.name))>0" if name else ''} "}
+            ORDER BY {items_sort}
+            OFFSET %s
+            LIMIT 10
+        """
+        params = (skip,)
+        cursor.execute(sql, params)
+        transactions = cursor.fetchall()
 
-    transactions = await prisma.transactions.find_many(
-        where=dict(query),
-        skip=skip,
-        order= items_sort
-    )
+    except:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Query Error')
 
-    if len(list(transactions)) <10:
+    if len(transactions) <10:
         isLastPage = True
     else:
         isLastPage = False
 
-    await prisma.disconnect()
     return {"success":True, "data":{"transactions":transactions, "isLastPage":isLastPage}}

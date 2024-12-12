@@ -1,30 +1,46 @@
 from ...dependencies.githubprovider import get_user
 from ...dependencies.token import create_token
-from ...utils.models import GitUser
-from prisma import Prisma
+from ...utils.models import GitUser, LoginResponse
+from ...pyscopg_connect import dbconnect
+from ...dependencies.placeholders import account_balance, placeholders
+from psycopg2.extras import Json
+import uuid
+from .auth_sqls import register_sql
 
-prisma = Prisma()
-
-
-async def github_login(code:str):
-    await prisma.connect()
+async def github_login(code:str) -> LoginResponse:
     auth_data = get_user(code)
+    acct_summary = account_balance()
+    data = placeholders()
+    user_id = str(uuid.uuid1())
+    cursor = dbconnect.cursor()
+    cursor.execute(f""" SELECT githubid FROM "user" u WHERE u.email = '{auth_data['email']}' """)
+    user = cursor.fetchone()
 
-    user = await prisma.user.find_first(where={"githubid":auth_data["id"]})
+    if not user[0]:
+        params = (
+                user_id,
+                auth_data['name'], 
+                auth_data['email'],
+                auth_data['avatar_url'],
+                auth_data['id'],
+                acct_summary["income"],
+                acct_summary["expenses"],
+                acct_summary["balance"],
+                trns, bills, budgets, pots
+        )
 
-    if user != None and user.email != auth_data["email"]:
-        user = await prisma.user.update(where={"id":user.id}, data={"email":auth_data["email"]})
+        trns = Json(data["transactions"])
+        bills = Json(data["bills"])
+        budgets = Json(data["budgets"])
+        pots = Json(data["pots"])
+        cursor.execute(register_sql, params)
+        user = cursor.fetchone()
+        
+    token = create_token(user[0]["id"])
 
-    if not user or user == None:
-        user = await prisma.user.create(data={
-            "name":auth_data["name"],
-            "email":auth_data["email"],
-            "avatar":auth_data["avatar_url"],
-            "githubid":auth_data["id"],
-            "income":5000
-        })
+    return {"name":user["name"], "success":True, "access_Token":token, "token_type":"Bearer"}
 
-    token = create_token(user.id)
-    await prisma.disconnect()
+# # Use execute_values to efficiently insert multiple rows
+# execute_values(cur, insert_query, [(value,) for value in values])
 
-    return {"name":user.name, "success":True, "accessToken":token}
+#or like I have above

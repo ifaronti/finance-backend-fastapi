@@ -15,19 +15,19 @@ class signup_response(BaseModel):
 
 router = APIRouter(prefix="/auth",tags=["Authentication"])
 
-@router.post("/signup", status_code=status.HTTP_201_CREATED, response_model=signup_response)
-async def register(user_details:Register):
-    await signup(user_details)
-    return {"Success":True, "Message":"User created successfully"}
+@router.post("/signup", status_code=status.HTTP_201_CREATED)
+def register(user_details:Register):
+    return signup(user_details)
+
 
 @router.post("/login", status_code=status.HTTP_200_OK, response_model=LoginResponse)
-async def login(data:Annotated[Login, Depends(OAuth2PasswordRequestForm)]):
-    return await logon(data)
+def login(data:Annotated[Login, Depends(OAuth2PasswordRequestForm)]):
+    return logon(data)
 
 @router.get("/login", status_code=status.HTTP_200_OK, response_model=LoginResponse)
-async def gitLogin(code:str):
-    return await github_login(code)
+def gitLogin(code:str):
+    return github_login(code)
 
 @router.patch("/user")
-async def user_update(details:Annotated[UserUpdate, Depends(verify_token)], req:Request):
-    return await update_user(details=details, req=req)
+def user_update(details:Annotated[UserUpdate, Depends(verify_token)], req:Request):
+    return update_user(details=details, req=req)

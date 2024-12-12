@@ -10,5 +10,5 @@ router = APIRouter(
 )
 
 @router.get('/', status_code=status.HTTP_200_OK)
-async def summary(req:Request):
-    return await account_summary(req=req)
+def summary(req:Request):
+    return account_summary(req=req)

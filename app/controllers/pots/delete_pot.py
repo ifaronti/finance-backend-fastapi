@@ -1,19 +1,21 @@
-from prisma import Prisma
-from fastapi import status, HTTPException
+from fastapi import status, HTTPException, Request
+from ...pyscopg_connect import dbconnect
 
-prisma = Prisma()
-
-prisma_exception = HTTPException(status_code=status.HTTP_400_BAD_REQUEST, 
+exception = HTTPException(status_code=status.HTTP_400_BAD_REQUEST, 
                             detail="An error occured check id params")
 
 
-async def delete_pot(id:int):
+def delete_pot(id:int, req:Request):
+    cursor = dbconnect.cursor()
     try:
-        await prisma.connect()
-        await prisma.pots.delete(where={"potId":id})
+        sql = f""" 
+            DELETE FROM pots
+            WHERE "potId" = %s
+            AND "userId" = '{req.state.user}'
+        """
+        cursor.execute(sql, (id,))
+        dbconnect.commit()
     except:
-        raise prisma_exception
-    finally:
-        await prisma.disconnect()
+        raise exception
 
     return {"success":True, "message":"Pot deleted"}

@@ -1,14 +1,11 @@
-from prisma import Prisma
 from fastapi import Request, HTTPException, status
 from typing import Optional
-
-prisma = Prisma()
+from ...pyscopg_connect import dbconnect
 
 async def get_budgets(req:Request, skip:Optional[int]=0):
+    cursor = dbconnect.cursor()
     try:
-        await prisma.connect()
-
-        budgets = await prisma.query_raw (f""" 
+        sql = f""" 
             WITH recent_transactions AS (
                 SELECT 
                     t."categoryId", 
@@ -44,9 +41,11 @@ async def get_budgets(req:Request, skip:Optional[int]=0):
             WHERE 
                 bg."userId" = '{req.state.user}'
             GROUP BY 
-                bg."budgetId" """)
+                bg."budgetId" """
+        
+        cursor.execute(sql)
+        budgets = cursor.fetchall()
     except:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Prisma error, try again")
-    finally:
-        await prisma.disconnect()
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="database query error, try again")
+
     return {"success":True, "data":budgets}

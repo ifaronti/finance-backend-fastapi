@@ -1,7 +1,7 @@
-generator py {
-  provider             = "prisma-client-py"
-  recursive_type_depth = "5"
-  interface            = "asyncio"
+generator client {
+  provider                    = "prisma-client-py"
+  binaryTargets               = ["native", "debian-openssl-1.1.x", "debian-openssl-3.0.x"]
+  interface                   = "asyncio"
   enable_experimental_decimal = true
 }
 
@@ -88,10 +88,11 @@ model user {
   password     String?        @db.VarChar
   updatedAt    DateTime       @default(now())
   createdAt    DateTime       @default(now())
-  usedTokens   String[]
-  githubid     Int?
+  githubid     Int?           @unique
   bills        bills[]
   budgets      budgets[]
   pots         pots[]
   transactions transactions[]
+
+  @@unique([id, email, githubid])
 }

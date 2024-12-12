@@ -1,40 +1,18 @@
-from prisma import Prisma
 from ...utils.models import CreateBudget
 from fastapi import Request, HTTPException, status
-from datetime import datetime
-
-prisma = Prisma()
+from ...pyscopg_connect import dbconnect
 
 async def create_budget(data:CreateBudget, req:Request):
-    user_id = req.state.user
-    data_copy = dict(data).copy()
-    data_copy["userId"] = user_id
-
+    cursor = dbconnect.cursor()
     try:
-        await prisma.connect()
-        total_spent = await prisma.transactions.group_by(
-            by=["userId"],
-            where={
-                "userId":user_id, 
-                "category":data_copy["category"],
-                "date":{
-                    "gte":"2024-08-31T20:50:18Z",
-                }
-            },
-            sum={
-                "amount":True
-            }
-        )
-        if len(total_spent) == 0:
-            spent = 0
-
-        data_copy["spent"] = spent
-        await prisma.budgets.create(
-            data=data_copy,
-        )
+        sql = f"""
+            INSERT INTO budgets ("userId", maximum, theme, "categoryId", category)
+            VALUES (%s, %s, %s, %s, %s)
+        """
+        params = (req.state.user, data.maximum, data.theme, data.categoryId, data.category)
+        cursor.execute(sql, params)
+        dbconnect.commit()
     except:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Error occured")
-    finally:
-        await prisma.disconnect()
         
-    return {"success":True, "Message": "Budget created successfully"}
+    return {"success":True, "message": "Budget created successfully"}

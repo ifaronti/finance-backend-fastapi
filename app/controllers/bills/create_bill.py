@@ -1,21 +1,27 @@
-from fastapi import Request, HTTPException, status
-from prisma import Prisma
-from ...utils.models import CreateBill
+from fastapi import Request
+from ...utils.models import CreateBill, GenericResponse
+from ...pyscopg_connect import dbconnect
 
-prisma = Prisma()
+def create_bill(data:CreateBill, req:Request)->GenericResponse:
+    sql = f"""
+        INSERT INTO bills ("userId", amount, name, avatar, category, categoryId, due_day)
+        VALUES('{req.state.user}', %s, $s, $s, $s, $s, $s)
+    """
+    params = (
+        data.amount,
+        data.name,
+        data.avatar,
+        data.category,
+        data.categoryId,
+        data.due_day
+    )
+    
+    cursor = dbconnect.cursor()
 
-prisma_exception = HTTPException(status_code=status.HTTP_400_BAD_REQUEST, 
-                            detail="An error occured")
-
-async def create_bill(data:CreateBill, req:Request):
-    data_copy = dict(data).copy()
-    data_copy["userId"] = req.state.user
     try:
-        await prisma.connect()
-        await prisma.bills.create(data=data_copy)
-    except:
-        raise prisma_exception
-    finally:
-        await prisma.disconnect()
+        cursor.execute(sql, params)
+        dbconnect.commit()
+    except Exception as e:
+        raise e.message
 
     return {"success":True, "message":"Bill successfully added to account"}
