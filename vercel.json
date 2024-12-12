@@ -4,9 +4,9 @@
       { "src": "main.py", "use": "@vercel/python" }
     ],
     "routes": [
-      { "src": "/(.*)", "dest": "/main.py" }
+      { "src": "/(.*)", "dest": "main.py" }
     ],
     "env": {
-      "APP_MODULE": "main.py"
+      "APP_MODULE": "main"
     }
   }
