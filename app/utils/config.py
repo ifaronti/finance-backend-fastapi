@@ -11,3 +11,7 @@ class Settings(BaseSettings):
     PGDATABASE:str
     PGUSER:str
     PGPASSWORD:str
+    DATABASE_URL: str
+    
+    class Config:
+        env_file = ".env"
