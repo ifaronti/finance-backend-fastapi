@@ -5,7 +5,7 @@ from ...pyscopg_connect import dbconnect
 exception = HTTPException(status_code=status.HTTP_400_BAD_REQUEST, 
                             detail="An error occured; resource not created; check payload")
 
-async def create_pot(data:CreatePot, req:Request):
+def create_pot(data:CreatePot, req:Request):
     cursor = dbconnect.cursor()
     try:
         sql =f""" 

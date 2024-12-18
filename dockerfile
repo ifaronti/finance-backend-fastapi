@@ -1,13 +1,13 @@
-FROM public.ecr.aws/lambda/python:3.13
+FROM python:3.13
 
-# WORKDIR /usr/src/app
+WORKDIR /usr/src/app
 
-COPY main.py ${LAMBDA_TASK_ROOT}
-COPY app placeholders.json ./
-COPY requirements.txt ${LAMBDA_TASK_ROOT}
-RUN pip install psycopg2-binary
-RUN pip install -r requirements.txt
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . ${LAMBDA_TASK_ROOT}
-
-CMD ["main.handler"]
+COPY app ./app
+COPY venv ./venv
+COPY main.py .
+COPY placeholders.json .
+COPY .env .
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -7,7 +7,7 @@ from ...utils.sort_transacions import sort_transactions
 prisma_exception = HTTPException(status_code=status.HTTP_400_BAD_REQUEST, 
                             detail="An error occured")
 
-async def get_bills(req:Request, 
+def get_bills(req:Request, 
                     skip:Optional[int]=0, 
                     name:Optional[str]=None, 
                     sort:Optional[str]="Latest"

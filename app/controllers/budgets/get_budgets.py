@@ -2,7 +2,7 @@ from fastapi import Request, HTTPException, status
 from typing import Optional
 from ...pyscopg_connect import dbconnect
 
-async def get_budgets(req:Request, skip:Optional[int]=0):
+def get_budgets(req:Request, skip:Optional[int]=0):
     cursor = dbconnect.cursor()
     try:
         sql = f""" 

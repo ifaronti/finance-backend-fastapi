@@ -2,7 +2,7 @@ from ...utils.models import CreateBudget
 from fastapi import Request, HTTPException, status
 from ...pyscopg_connect import dbconnect
 
-async def create_budget(data:CreateBudget, req:Request):
+def create_budget(data:CreateBudget, req:Request):
     cursor = dbconnect.cursor()
     try:
         sql = f"""

@@ -7,7 +7,7 @@ from psycopg2.extras import Json
 import uuid
 from .auth_sqls import register_sql
 
-async def github_login(code:str) -> LoginResponse:
+def github_login(code:str) -> LoginResponse:
     auth_data = get_user(code)
     acct_summary = account_balance()
     data = placeholders()

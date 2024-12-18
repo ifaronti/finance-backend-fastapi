@@ -19,9 +19,9 @@ def new_pot(data:CreateBill, req:Request):
     return create_bill(data=data, req=req)
 
 @router.delete('/{id}', status_code=status.HTTP_200_OK, response_model=GenericResponse, description="Delete a bill")
-async def kill_bill(id:int, req:Request):
-    return await delete_bill(id=id, req=req)
+def kill_bill(id:int, req:Request):
+    return delete_bill(id=id, req=req)
 
 @router.get("/", status_code=status.HTTP_200_OK, description=getBills_description)
-async def getBills(req:Request, skip:Optional[int]=0, name:Optional[str]=None):
-    return await get_bills(req=req, skip=skip, name=name)
+def getBills(req:Request, skip:Optional[int]=0, name:Optional[str]=None):
+    return get_bills(req=req, skip=skip, name=name)

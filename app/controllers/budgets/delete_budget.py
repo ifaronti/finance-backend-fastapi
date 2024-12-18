@@ -1,7 +1,7 @@
 from fastapi import HTTPException, status, Request
 from ...pyscopg_connect import dbconnect
 
-async def delete_budget(id:int, req:Request):
+def delete_budget(id:int, req:Request):
     cursor = dbconnect.cursor()
     try:
         sql = f"""
