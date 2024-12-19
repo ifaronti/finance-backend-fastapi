@@ -6,9 +6,20 @@ from app.routers import pots
 from app.routers import bills
 from app.routers import summary
 from mangum import Mangum
-from app.pyscopg_connect import dbconnect
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 
 app = FastAPI()
+app.add_middleware(HTTPSRedirectMiddleware)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], 
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["Authorization", "X-Custom-Header"] 
+)
 
 app.include_router(auth.router)
 app.include_router(summary.router)
@@ -16,14 +27,6 @@ app.include_router(transactions.router)
 app.include_router(bills.router)
 app.include_router(budgets.router)
 app.include_router(pots.router)
-
-cursor = dbconnect.cursor()
-
-def shutdownEvent():
-    cursor.close()
-    dbconnect.close()
-
-app.add_event_handler('shutdown', shutdownEvent)
 
 @app.get('/')
 def welcome_page():

@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends, Request, status, Query
 from ..controllers.transactions.get_transactions import get_Transactions
 from ..dependencies.token import verify_token
 from typing import Optional
-from pydantic import BaseModel
 from enum import Enum
 
 router = APIRouter(
@@ -37,7 +36,7 @@ description = ("""Get transactions by name, or categories and sort result by nam
                request is 10
                """)
 
-@router.get('/', status_code=status.HTTP_200_OK, description=description)
+@router.get('', status_code=status.HTTP_200_OK, description=description)
 def transactions(
                 req:Request, 
                 skip:int, 

@@ -1,7 +1,8 @@
 from ...dependencies.githubprovider import get_user
 from ...dependencies.token import create_token
-from ...utils.models import GitUser, LoginResponse
-from ...pyscopg_connect import dbconnect
+from ...utils.models import LoginResponse
+from ...pyscopg_connect import Connect
+from psycopg2 import InterfaceError, OperationalError
 from ...dependencies.placeholders import account_balance, placeholders
 from psycopg2.extras import Json
 import uuid
@@ -12,11 +13,14 @@ def github_login(code:str) -> LoginResponse:
     acct_summary = account_balance()
     data = placeholders()
     user_id = str(uuid.uuid1())
+    conn = Connect()
+    dbconnect = conn.dbconnect()
     cursor = dbconnect.cursor()
+
     cursor.execute(f""" SELECT githubid FROM "user" u WHERE u.email = '{auth_data['email']}' """)
     user = cursor.fetchone()
 
-    if not user[0]:
+    if not user:
         params = (
                 user_id,
                 auth_data['name'], 
@@ -33,8 +37,22 @@ def github_login(code:str) -> LoginResponse:
         bills = Json(data["bills"])
         budgets = Json(data["budgets"])
         pots = Json(data["pots"])
-        cursor.execute(register_sql, params)
-        user = cursor.fetchone()
+
+        try:
+            conn = Connect()
+            dbconnect = conn.dbconnect()
+            cursor = dbconnect.cursor()
+            cursor.execute(register_sql, params)
+            user = cursor.fetchone()
+        except InterfaceError:
+            raise InterfaceError
+        except OperationalError:
+            raise OperationalError
+        except Exception:
+            raise Exception
+        finally:
+            cursor.close()
+            dbconnect.close()
         
     token = create_token(user[0]["id"])
 

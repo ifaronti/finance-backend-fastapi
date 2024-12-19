@@ -9,6 +9,6 @@ router = APIRouter(
     dependencies=[Depends(verify_token)]
 )
 
-@router.get('/', status_code=status.HTTP_200_OK)
+@router.get('', status_code=status.HTTP_200_OK)
 def summary(req:Request):
     return account_summary(req=req)

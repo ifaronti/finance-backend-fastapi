@@ -1,7 +1,8 @@
 from ...dependencies.password_manager import hash_password
 from fastapi import Request
 from ...utils.models import UserUpdate, GenericResponse
-from ...pyscopg_connect import dbconnect
+from ...pyscopg_connect import Connect
+from psycopg2 import InterfaceError, OperationalError
 
 def update_user(req:Request, details:UserUpdate)-> GenericResponse:
     if details.password:
@@ -14,8 +15,20 @@ def update_user(req:Request, details:UserUpdate)-> GenericResponse:
                 name = COALESCE(%s, name)
             WHERE id = %s
         """
-    cursor = dbconnect.cursor()
-    cursor.execute(sql, (pass_hash, details.email, details.name, req.state.user))
+    try:
+        conn = Connect()
+        dbconnect = conn.dbconnect()
+        cursor = dbconnect.cursor()
+        cursor.execute(sql, (pass_hash, details.email, details.name, req.state.user))
+    except InterfaceError:
+        raise InterfaceError
+    except OperationalError as e:
+        raise e
+    except Exception:
+        raise Exception
+    finally:
+        cursor.close()
+        dbconnect.close()
     
     return {"success":True, "message":"User Account updated successfully"}
 

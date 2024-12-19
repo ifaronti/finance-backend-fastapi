@@ -1,6 +1,7 @@
 from fastapi import status, HTTPException, Request
 from ...utils.sort_transacions import sort_transactions
-from ...pyscopg_connect import dbconnect
+from ...pyscopg_connect import Connect
+from psycopg2 import InterfaceError, OperationalError
 from typing import Optional
 
 def get_Transactions(req:Request,
@@ -10,7 +11,6 @@ def get_Transactions(req:Request,
                         name:Optional[str]= None
                     ):
     items_sort = sort_transactions(sort)
-    cursor = dbconnect.cursor()
     if category == "All":
         category = None
     try:
@@ -24,11 +24,21 @@ def get_Transactions(req:Request,
             LIMIT 10
         """
         params = (skip,)
+        conn = Connect()
+        dbconnect = conn.dbconnect()
+        cursor = dbconnect.cursor()
         cursor.execute(sql, params)
         transactions = cursor.fetchall()
 
-    except:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Query Error')
+    except InterfaceError as i:
+        raise i
+    except OperationalError as o:
+        raise o
+    except Exception as e:
+        raise e
+    finally:
+        cursor.close()
+        dbconnect.close()
 
     if len(transactions) <10:
         isLastPage = True

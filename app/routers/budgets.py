@@ -14,7 +14,7 @@ router = APIRouter(
     dependencies=[Depends(verify_token)]
 )
 
-@router.post("/", status_code=status.HTTP_201_CREATED, response_model=GenericResponse)
+@router.post("", status_code=status.HTTP_201_CREATED, response_model=GenericResponse)
 def createBudget(data:CreateBudget, req:Request):
     return create_budget(data, req)
 
@@ -22,7 +22,7 @@ def createBudget(data:CreateBudget, req:Request):
 def deleteBudget(id:int, req:Request):
     return delete_budget(id, req=req)
 
-@router.get("/", status_code=status.HTTP_200_OK)
+@router.get("", status_code=status.HTTP_200_OK)
 def getBudgets(req:Request, skip:Optional[int]=0):
     return get_budgets(req=req, skip=skip)
 

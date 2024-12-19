@@ -1,11 +1,10 @@
-from fastapi import HTTPException, Request, status
+from fastapi import Request
 from typing import Optional
-from ...pyscopg_connect import dbconnect
+from ...pyscopg_connect import Connect
+from psycopg2 import InterfaceError, OperationalError
 from datetime import datetime
 from ...utils.sort_transacions import sort_transactions
 
-prisma_exception = HTTPException(status_code=status.HTTP_400_BAD_REQUEST, 
-                            detail="An error occured")
 
 def get_bills(req:Request, 
                     skip:Optional[int]=0, 
@@ -15,7 +14,6 @@ def get_bills(req:Request,
     
     item_sort = sort_transactions(sort, createdAt=True)
     today = datetime.now().day
-    cursor = dbconnect.cursor()
 
     try:
         sql = f"""
@@ -41,10 +39,20 @@ def get_bills(req:Request,
             AND bill_day.b_row <= 10
             OFFSET {skip}
         """
+        conn = Connect()
+        dbconnect = conn.dbconnect()
+        cursor = dbconnect.cursor()
         cursor.execute(sql)
         bills = cursor.fetchall()
-    except:
-        raise prisma_exception
+    except InterfaceError as i:
+        raise i
+    except OperationalError as o:
+        raise o
+    except Exception as e:
+        raise e
+    finally:
+        cursor.close()
+        dbconnect.close()
     
     bills_copy = list(bills)
 

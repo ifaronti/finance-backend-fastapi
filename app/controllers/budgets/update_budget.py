@@ -1,9 +1,9 @@
-from fastapi import Request, HTTPException, status
+from fastapi import Request
 from ...utils.models import UpdateBudget
-from ...pyscopg_connect import dbconnect
+from ...pyscopg_connect import Connect
+from psycopg2 import InterfaceError, OperationalError
 
 def update_budget(data:UpdateBudget, req:Request):
-    cursor = dbconnect.cursor()
     try:
         sql = f""" 
             UPDATE budget
@@ -16,9 +16,18 @@ def update_budget(data:UpdateBudget, req:Request):
             AND budget."userId" = '{req.state.user}'
         """
         params = (data.theme, data.maximum, data.category, data.categoryId, data.budgetId)
+        conn = Connect()
+        dbconnect = conn.dbconnect()
+        cursor = dbconnect.cursor()
         cursor.execute(sql, params)
         dbconnect.commit()
-    except Exception:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Budget not updated try again")
-
+    except InterfaceError as i:
+        raise i
+    except OperationalError as o:
+        raise o
+    except Exception as e:
+        raise e
+    finally:
+        cursor.close()
+        dbconnect.close()
     return {"success":True, "message":"Budget updated successfully"}

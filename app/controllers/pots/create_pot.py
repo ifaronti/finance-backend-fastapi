@@ -1,21 +1,28 @@
-from fastapi import status, HTTPException, Request
+from fastapi import Request
 from ...utils.models import CreatePot
-from ...pyscopg_connect import dbconnect
-
-exception = HTTPException(status_code=status.HTTP_400_BAD_REQUEST, 
-                            detail="An error occured; resource not created; check payload")
+from ...pyscopg_connect import Connect
+from psycopg2 import InterfaceError, OperationalError
 
 def create_pot(data:CreatePot, req:Request):
-    cursor = dbconnect.cursor()
     try:
         sql =f""" 
             INSERT INTO pots ("userId", name, target, total, theme)
             VALUES('{req.state.user}', %s, %s, %s, %s)
         """
         params = (data.name, data.target, data.total, data.theme)
+        conn = Connect()
+        dbconnect = conn.dbconnect()
+        cursor = dbconnect.cursor()
         cursor.execute(sql, params)
         dbconnect.commit()
-    except Exception:
-        raise exception
+    except InterfaceError as i:
+        raise i
+    except OperationalError as o:
+        raise o
+    except Exception as e:
+        raise e
+    finally:
+        cursor.close()
+        dbconnect.close()
 
     return {"success":True, "message": "Pot created successfully"}

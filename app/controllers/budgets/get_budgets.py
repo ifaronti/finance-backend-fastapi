@@ -1,9 +1,9 @@
-from fastapi import Request, HTTPException, status
+from fastapi import Request
 from typing import Optional
-from ...pyscopg_connect import dbconnect
+from ...pyscopg_connect import Connect
+from psycopg2 import InterfaceError, OperationalError
 
 def get_budgets(req:Request, skip:Optional[int]=0):
-    cursor = dbconnect.cursor()
     try:
         sql = f""" 
             WITH recent_transactions AS (
@@ -42,10 +42,18 @@ def get_budgets(req:Request, skip:Optional[int]=0):
                 bg."userId" = '{req.state.user}'
             GROUP BY 
                 bg."budgetId" """
-        
+        conn = Connect()
+        dbconnect = conn.dbconnect()
+        cursor = dbconnect.cursor()
         cursor.execute(sql)
         budgets = cursor.fetchall()
-    except:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="database query error, try again")
-
+    except InterfaceError as i:
+        raise i
+    except OperationalError as o:
+        raise o
+    except Exception as e:
+        raise e
+    finally:
+        cursor.close()
+        dbconnect.close()
     return {"success":True, "data":budgets}

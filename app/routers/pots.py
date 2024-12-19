@@ -13,7 +13,7 @@ router = APIRouter(
     dependencies=[Depends(verify_token)]
 )
 
-@router.post("/", status_code=status.HTTP_201_CREATED, response_model=GenericResponse)
+@router.post("", status_code=status.HTTP_201_CREATED, response_model=GenericResponse)
 def CreatePot(data:CreatePot, req:Request):
     return create_pot(req=req, data=data)
 
@@ -21,11 +21,11 @@ def CreatePot(data:CreatePot, req:Request):
 def DeletePot(id:int, req:Request):
     return delete_pot(id=id, req=req)
 
-@router.get("/", status_code=status.HTTP_200_OK)
+@router.get("", status_code=status.HTTP_200_OK)
 def Getpots(req:Request, skip:Optional[int]=0):
     return get_pots(req=req, skip=skip)
 
-@router.patch("/", status_code=status.HTTP_200_OK, response_model=GenericResponse)
+@router.patch("/pot/modify", status_code=status.HTTP_200_OK, response_model=GenericResponse)
 def patch_pot(data:UpdatePot, req:Request, add:Optional[int]=None, subtract:Optional[int]=None):
     print(subtract)
     return update_pot(data=data, req=req, add=add, subtract=subtract)

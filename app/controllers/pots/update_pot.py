@@ -1,17 +1,14 @@
 from fastapi import Request, status, HTTPException
 from ...utils.models import UpdatePot, GenericResponse
 from typing import Optional
-from ...pyscopg_connect import dbconnect
-
-exception = HTTPException(status_code=status.HTTP_400_BAD_REQUEST, 
-                            detail="An error occured")
+from ...pyscopg_connect import Connect
+from psycopg2 import InterfaceError, OperationalError
 
 def update_pot(req:Request, 
                data:UpdatePot, 
                add:Optional[int]=None, 
                subtract:Optional[int]=None
             )->GenericResponse:
-    cursor = dbconnect.cursor()
     try:
         sql = f"""
             WITH pot_update AS(
@@ -40,10 +37,19 @@ def update_pot(req:Request,
             add,
             subtract
         )
-
+        conn = Connect()
+        dbconnect = conn.dbconnect()
+        cursor = dbconnect.cursor()
         cursor.execute(sql, params)
         dbconnect.commit()
-    except:
-        raise exception
+    except InterfaceError as i:
+        raise i
+    except OperationalError as o:
+        raise o
+    except Exception as e:
+        raise e
+    finally:
+        cursor.close()
+        dbconnect.close()
     
     return {"success":True, "message":"Pot updated successfully."}
