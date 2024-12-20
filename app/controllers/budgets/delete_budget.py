@@ -7,7 +7,7 @@ def delete_budget(id:int, req:Request):
         sql = f"""
             DELETE FROM budgets
             WHERE "budgetId" = %s
-            AND budgets."userId = '{req.state.user}'
+            AND budgets."userId" = '{req.state.user}'
         """
         conn = Connect()
         dbconnect = conn.dbconnect()

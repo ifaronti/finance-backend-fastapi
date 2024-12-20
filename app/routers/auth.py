@@ -1,11 +1,11 @@
 from pydantic import BaseModel
-from fastapi import APIRouter, Depends, status, Request
+from fastapi import APIRouter, Depends, status
 from ..controllers.auth.signup import signup
 from ..controllers.auth.login import logon
 from ..controllers.auth.oauth import github_login
 from ..controllers.auth.user_update import update_user
 from ..dependencies.token import verify_token
-from ..utils.models import Register, Login, LoginResponse, UserUpdate
+from ..utils.models import Register, Login, LoginResponse
 from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 from typing import Annotated
 
@@ -28,6 +28,6 @@ def login(data:Annotated[Login, Depends(OAuth2PasswordRequestForm)]):
 def gitLogin(code:str):
     return github_login(code)
 
-@router.patch("/user")
-def user_update(details:Annotated[UserUpdate, Depends(verify_token)], req:Request):
-    return update_user(details=details, req=req)
+# @router.patch("/user")
+# def user_update(details:Annotated[UserUpdate, Depends(verify_token)], req:Request):
+#     return update_user(details=details, req=req)

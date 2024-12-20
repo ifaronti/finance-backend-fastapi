@@ -24,7 +24,7 @@ class UserUpdate(BaseModel):
         pattern=r'^[\p{L}\p{N}\s-]+$'
     )
     email: Optional[EmailStr]
-    password:Optional[str] = ''
+    password:Optional[str] = None
 
 class TokenPayload(BaseModel):
     exp:datetime
@@ -63,13 +63,10 @@ class UpdateBudget(BaseModel):
     theme:Optional[str] = None
     maximum:Optional[int] = None
     budgetId:int
-    category:Optional[str] = None
-    categoryId:Optional[int] = None
 
 class CreatePot(BaseModel):
     name:str
     target:int
-    total:int
     theme:str
 
 class UpdatePot(BaseModel):

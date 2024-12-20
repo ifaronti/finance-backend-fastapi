@@ -20,6 +20,7 @@ def update_user(req:Request, details:UserUpdate)-> GenericResponse:
         dbconnect = conn.dbconnect()
         cursor = dbconnect.cursor()
         cursor.execute(sql, (pass_hash, details.email, details.name, req.state.user))
+        dbconnect.commit()
     except InterfaceError:
         raise InterfaceError
     except OperationalError as e:

@@ -4,7 +4,6 @@ from ...pyscopg_connect import Connect
 from psycopg2 import InterfaceError, OperationalError
 
 def create_budget(data:CreateBudget, req:Request):
-    cursor = dbconnect.cursor()
     try:
         sql = f"""
             INSERT INTO budgets ("userId", maximum, theme, "categoryId", category)

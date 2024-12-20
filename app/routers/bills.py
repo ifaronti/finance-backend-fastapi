@@ -15,11 +15,11 @@ router = APIRouter(
 getBills_description = "Get bills in multitude of 10, skip by 10 and or get by bill's name"
 
 @router.post("", status_code=status.HTTP_201_CREATED, response_model=GenericResponse, description="Add a new bill")
-def new_pot(data:CreateBill, req:Request):
+def new_bill(data:CreateBill, req:Request):
     return create_bill(data=data, req=req)
 
 @router.delete('/{id}', status_code=status.HTTP_200_OK, response_model=GenericResponse, description="Delete a bill")
-def kill_bill(id:int, req:Request):
+def remove_bill(id:int, req:Request):
     return delete_bill(id=id, req=req)
 
 @router.get("/all", status_code=status.HTTP_200_OK, description=getBills_description)

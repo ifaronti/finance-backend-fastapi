@@ -1,4 +1,4 @@
-from fastapi import Request, status, HTTPException
+from fastapi import Request
 from ...utils.models import UpdatePot, GenericResponse
 from typing import Optional
 from ...pyscopg_connect import Connect
@@ -34,8 +34,8 @@ def update_pot(req:Request,
             add,
             data.target if not 0 else None,
             data.potId if not 0 else None,
-            add,
-            subtract
+            subtract,
+            add
         )
         conn = Connect()
         dbconnect = conn.dbconnect()

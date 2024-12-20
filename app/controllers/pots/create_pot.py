@@ -9,7 +9,7 @@ def create_pot(data:CreatePot, req:Request):
             INSERT INTO pots ("userId", name, target, total, theme)
             VALUES('{req.state.user}', %s, %s, %s, %s)
         """
-        params = (data.name, data.target, data.total, data.theme)
+        params = (data.name, data.target, 0, data.theme)
         conn = Connect()
         dbconnect = conn.dbconnect()
         cursor = dbconnect.cursor()

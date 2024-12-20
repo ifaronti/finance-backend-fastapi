@@ -43,6 +43,7 @@ def github_login(code:str) -> LoginResponse:
             dbconnect = conn.dbconnect()
             cursor = dbconnect.cursor()
             cursor.execute(register_sql, params)
+            dbconnect.commit()
             user = cursor.fetchone()
         except InterfaceError:
             raise InterfaceError
